@@ -23,16 +23,25 @@ const initialAttributes = [
 ]
 
 function getXPRequired(level) {
-  return 100
+   return Math.floor(100 * Math.pow(level, 1.5))
 }
 
 export function AppStateProvider({ children }) {
   const [user, setUser] = useState(null)
+  const [characterLevel, setCharacterLevel] = useState(1)
   const [attributes, setAttributes] = useState(initialAttributes)
   const [quests, setQuests] = useState([])
   const [market, setMarket] = useState(marketItems)
   const [levelUpPayload, setLevelUpPayload] = useState(null)
   const [loading, setLoading] = useState(true)
+
+  const revealCharacter = useCallback(() => {
+  if (!user) return
+
+  setCharacterLevel(user.level)
+}, [user])
+  
+
 
   const loadPlayerData = useCallback(async () => {
     setLoading(true)
@@ -101,6 +110,7 @@ export function AppStateProvider({ children }) {
       questsCompleted: stats.quests_completed,
       xpToNext: getXPRequired(stats.level),
     })
+    setCharacterLevel(stats.level)
 
     setAttributes([
       {
@@ -266,33 +276,37 @@ export function AppStateProvider({ children }) {
 
   const value = useMemo(
     () => ({
-      user,
-      attributes,
-      quests,
-      market,
-      levelUpPayload,
-      loading,
-      completeQuest,
-      addQuest,
-      buyItem,
-      triggerLevelUp,
-      clearLevelUp,
-      reloadPlayerData: loadPlayerData,
+    user,
+    characterLevel,
+    attributes,
+    quests,
+    market,
+    levelUpPayload,
+    loading,
+    completeQuest,
+    addQuest,
+    buyItem,
+    triggerLevelUp,
+    clearLevelUp,
+    revealCharacter,
+    reloadPlayerData: loadPlayerData,
     }),
     [
-      user,
-      attributes,
-      quests,
-      market,
-      levelUpPayload,
-      loading,
-      completeQuest,
-      addQuest,
-      buyItem,
-      triggerLevelUp,
-      clearLevelUp,
-      loadPlayerData,
-    ]
+  user,
+  characterLevel,
+  attributes,
+  quests,
+  market,
+  levelUpPayload,
+  loading,
+  completeQuest,
+  addQuest,
+  buyItem,
+  triggerLevelUp,
+  clearLevelUp,
+  revealCharacter,
+  loadPlayerData,
+]
   )
 
   return (

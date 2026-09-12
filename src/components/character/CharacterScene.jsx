@@ -1,8 +1,8 @@
-import { Canvas } from "@react-three/fiber";
-import { OrbitControls } from "@react-three/drei";
-import CharacterModel from "./CharacterModel";
-import Aura from "./Aura";
-import RisingParticles from "./RisingParticles";
+import { Canvas } from '@react-three/fiber'
+import { OrbitControls } from '@react-three/drei'
+import CharacterModel from './CharacterModel'
+import Aura from './Aura'
+import RisingParticles from './RisingParticles'
 
 function CharacterWorld() {
   return (
@@ -29,9 +29,7 @@ function CharacterWorld() {
       />
 
       <RisingParticles />
-
       <Aura />
-
       <CharacterModel />
 
       <mesh
@@ -49,25 +47,31 @@ function CharacterWorld() {
       <OrbitControls
         enablePan={false}
         enableZoom={false}
-        enableRotate={true}
-        autoRotate={true}
+        enableRotate
+        autoRotate
         autoRotateSpeed={0.7}
         minPolarAngle={Math.PI / 2.5}
         maxPolarAngle={Math.PI / 1.8}
       />
     </>
-  );
+  )
 }
 
 export default function CharacterScene() {
-    return (
-        <Canvas
-            camera={{
-                position: [0, 1.5, 5],
-                fov: 45,
-            }}
-        >
-            <CharacterWorld />
-        </Canvas>
-    );
+  return (
+    <Canvas
+      frameloop="always"
+      dpr={[1, 1.5]}
+      camera={{
+        position: [0, 1.5, 5],
+        fov: 45,
+      }}
+      gl={{
+        antialias: true,
+        powerPreference: 'high-performance',
+      }}
+    >
+      <CharacterWorld />
+    </Canvas>
+  )
 }

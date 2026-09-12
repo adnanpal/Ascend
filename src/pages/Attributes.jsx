@@ -22,7 +22,18 @@ const stats = (user) => [
 ]
 
 export default function Attributes() {
-  const { user, attributes } = useAppState()
+  
+  const { user, attributes, loading } = useAppState()
+
+  if (loading || !user) {
+    return (
+      <div className="flex min-h-[60vh] items-center justify-center">
+        <p className="font-display text-xs tracking-[0.3em] text-cyan">
+          ASCENDING...
+        </p>
+      </div>
+    )
+  }
 
   return (
     <div className="space-y-10">
@@ -52,7 +63,7 @@ export default function Attributes() {
         ))}
       </motion.div>
 
-      <CharacterChamber
+      /<CharacterChamber
         title="CHARACTER EVOLUTION"
         subtitle="Your visual evolution will appear here."
         height="h-[420px] md:h-[480px]"

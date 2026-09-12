@@ -22,8 +22,19 @@ const itemVariants = {
 }
 
 export default function Market() {
-  const { user, market, buyItem } = useAppState()
+
   const [justBought, setJustBought] = useState(null)
+  const { user, market, buyItem, loading } = useAppState()
+
+  if (loading || !user) {
+    return (
+      <div className="flex min-h-[60vh] items-center justify-center">
+        <p className="font-display text-xs tracking-[0.3em] text-cyan">
+          ASCENDING...
+        </p>
+      </div>
+    )
+  }
 
   const handleBuy = (item) => {
     buyItem(item.id)

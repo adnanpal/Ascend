@@ -36,3 +36,25 @@ export function getQuestReward(difficulty) {
 
   return reward
 }
+
+export function getXPRequired(level) {
+  return Math.floor(100 * Math.pow(level, 1.5))
+}
+
+export function calculateLevel(totalXp) {
+  let level = 1
+  let xpSpent = 0
+
+  while (
+    totalXp - xpSpent >= getXPRequired(level)
+  ) {
+    xpSpent += getXPRequired(level)
+    level += 1
+  }
+
+  return {
+    level,
+    currentXp: totalXp - xpSpent,
+    xpToNext: getXPRequired(level),
+  }
+}

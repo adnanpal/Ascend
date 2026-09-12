@@ -20,17 +20,27 @@ import AnimationTest from './pages/AnimationTest'
 
 import { supabase } from './lib/supabase'
 
+
 function GlobalLevelUp() {
-  const { levelUpPayload, clearLevelUp } = useAppState()
+  const {
+    levelUpPayload,
+    clearLevelUp,
+    revealCharacter,
+  } = useAppState()
 
   return (
     <LevelUpModal
       payload={levelUpPayload}
       onClose={clearLevelUp}
+      onRevealCharacter={revealCharacter}
     />
   )
 }
 
+
+/*
+ * Checks whether the user has a valid Supabase session.
+ */
 function ProtectedRoute({ children }) {
   const [session, setSession] = useState(undefined)
 
@@ -38,11 +48,17 @@ function ProtectedRoute({ children }) {
     let mounted = true
 
     async function loadSession() {
-      const { data } = await supabase.auth.getSession()
+      const { data, error } = await supabase.auth.getSession()
 
-      if (mounted) {
-        setSession(data.session)
+      if (!mounted) return
+
+      if (error) {
+        console.error('Failed to load session:', error)
+        setSession(null)
+        return
       }
+
+      setSession(data.session)
     }
 
     loadSession()
@@ -50,7 +66,9 @@ function ProtectedRoute({ children }) {
     const {
       data: { subscription },
     } = supabase.auth.onAuthStateChange((_event, session) => {
-      setSession(session)
+      if (mounted) {
+        setSession(session)
+      }
     })
 
     return () => {
@@ -59,19 +77,55 @@ function ProtectedRoute({ children }) {
     }
   }, [])
 
-  // Still checking Supabase
+  // Supabase is still checking the session.
   if (session === undefined) {
-    return null
+    return (
+      <div className="flex min-h-screen items-center justify-center bg-black">
+        <p className="font-display text-xs tracking-[0.3em] text-cyan">
+          CONNECTING...
+        </p>
+      </div>
+    )
   }
 
-  // Not logged in
+  // No authenticated session.
   if (!session) {
     return <Navigate to="/login" replace />
   }
 
-  // Logged in
+  // Authenticated.
   return children
 }
+
+function PlayerGate({ children }) {
+  const { user, loading } = useAppState()
+
+  // Player data is still loading.
+  if (loading) {
+    return (
+      <div className="flex min-h-screen items-center justify-center bg-black">
+        <p className="font-display text-xs tracking-[0.3em] text-cyan">
+          ASCENDING...
+        </p>
+      </div>
+    )
+  }
+
+  // Loading finished but there is no player.
+  // This can happen briefly during auth/session changes.
+  if (!user) {
+    return (
+      <div className="flex min-h-screen items-center justify-center bg-black">
+        <p className="font-display text-xs tracking-[0.3em] text-cyan">
+          INITIALIZING CHARACTER...
+        </p>
+      </div>
+    )
+  }
+
+  return children
+}
+
 
 export default function App() {
   return (
@@ -80,52 +134,103 @@ export default function App() {
         <HashRouter>
           <Routes>
 
-            {/* Public routes */}
+         
+
             <Route path="/" element={<Splash />} />
+
             <Route path="/login" element={<Login />} />
+
             <Route path="/signup" element={<Signup />} />
 
-            {/* Protected onboarding */}
+
+
             <Route
               path="/onboarding"
               element={
                 <ProtectedRoute>
-                  <Onboarding />
+                  <PlayerGate>
+                    <Onboarding />
+                  </PlayerGate>
                 </ProtectedRoute>
               }
             />
 
-            {/* Development test pages */}
-            <Route path="/character-test" element={<CharacterTest />} />
-            <Route path="/animation-test" element={<AnimationTest />} />
 
-            {/* Protected application */}
+            {/* =========================
+                DEVELOPMENT TEST PAGES
+            ========================== */}
+
+            <Route
+              path="/character-test"
+              element={<CharacterTest />}
+            />
+
+            <Route
+              path="/animation-test"
+              element={<AnimationTest />}
+            />
+
+
+         
+
             <Route
               element={
                 <ProtectedRoute>
-                  <AppShell />
+                  <PlayerGate>
+                    <AppShell />
+                  </PlayerGate>
                 </ProtectedRoute>
               }
             >
-              <Route path="/command" element={<CommandCenter />} />
-              <Route path="/quests" element={<Quests />} />
-              <Route path="/attributes" element={<Attributes />} />
-              <Route path="/market" element={<Market />} />
+              <Route
+                path="/command"
+                element={<CommandCenter />}
+              />
+
+              <Route
+                path="/quests"
+                element={<Quests />}
+              />
+
+              <Route
+                path="/attributes"
+                element={<Attributes />}
+              />
+
+              <Route
+                path="/market"
+                element={<Market />}
+              />
             </Route>
 
-            {/* Protected focus quest */}
+
             <Route
               path="/focus"
               element={
                 <ProtectedRoute>
-                  <FocusQuest />
+                  <PlayerGate>
+                    <FocusQuest />
+                  </PlayerGate>
                 </ProtectedRoute>
               }
             />
 
+
+            {/* =========================
+                FALLBACK
+            ========================== */}
+
+            <Route
+              path="*"
+              element={<Navigate to="/" replace />}
+            />
+
           </Routes>
 
+
+          {/* Global level-up modal */}
           <GlobalLevelUp />
+
         </HashRouter>
       </AppStateProvider>
     </MotionConfig>
