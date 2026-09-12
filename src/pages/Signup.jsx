@@ -24,44 +24,48 @@ export default function Signup() {
     }))
   }
 
-  const handleSubmit = async (e) => {
-    e.preventDefault()
+ const handleSubmit = async (e) => {
+  e.preventDefault()
 
-    setError('')
+  setError('')
 
-    if (form.password !== form.confirm) {
-      setError('Passwords do not match.')
-      return
-    }
-
-    if (form.password.length < 6) {
-      setError('Password must be at least 6 characters.')
-      return
-    }
-
-    setLoading(true)
-
-    const { data, error } = await supabase.auth.signUp({
-      email: form.email,
-      password: form.password,
-      options: {
-        data: {
-          username: form.username,
-        },
-      },
-    })
-
-    setLoading(false)
-
-    if (error) {
-      setError(error.message)
-      return
-    }
-
-    console.log('Signup successful:', data)
-
-    navigate('/onboarding')
+  if (form.password !== form.confirm) {
+    setError('Passwords do not match.')
+    return
   }
+
+  if (form.password.length < 6) {
+    setError('Password must be at least 6 characters.')
+    return
+  }
+
+  setLoading(true)
+
+  // Make sure an existing account/session cannot remain active
+  await supabase.auth.signOut()
+
+  const { data, error } = await supabase.auth.signUp({
+    email: form.email,
+    password: form.password,
+    options: {
+      data: {
+        username: form.username,
+      },
+    },
+  })
+
+  setLoading(false)
+
+  if (error) {
+    setError(error.message)
+    return
+  }
+
+  console.log('Signup successful:', data)
+
+  
+  navigate('/login')
+}
 
   return (
     <AuthLayout tagline="Every ascension starts with a single quest. Create your character and begin.">
