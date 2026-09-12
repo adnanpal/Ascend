@@ -1,6 +1,6 @@
 import { supabase } from './supabase'
 
-const API_URL = 'http://localhost:5000/api'
+const API_URL = process.env.FRONTEND_URL || 'http://localhost:5173'
 
 async function getAccessToken() {
   const {

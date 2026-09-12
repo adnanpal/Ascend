@@ -1,0 +1,4 @@
+User-agent: *
+Allow: /
+
+Sitemap: https://ascend-alpha-seven.vercel.app/sitemap.xml
