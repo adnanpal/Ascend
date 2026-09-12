@@ -18,9 +18,31 @@ const itemVariants = {
 }
 
 export default function CommandCenter() {
-  const { user, attributes, quests, completeQuest, triggerLevelUp } = useAppState()
+  const {
+    user,
+    attributes,
+    quests,
+    completeQuest,
+    triggerLevelUp,
+    loading,
+  } = useAppState()
+
+  if (loading) {
+    return (
+      <div className="grid min-h-[60vh] place-items-center">
+        <div className="text-xs font-semibold tracking-[0.2em] text-muted">
+          ASCENDING...
+        </div>
+      </div>
+    )
+  }
+
+  if (!user) {
+    return null
+  }
   const xpRemaining = user.xpToNext - user.xp
   const activeQuests = quests.filter((q) => q.status === 'active').slice(0, 3)
+
 
   return (
     <div className="space-y-10">
@@ -93,7 +115,12 @@ export default function CommandCenter() {
         >
           {attributes.map((a) => (
             <motion.div key={a.key} variants={itemVariants}>
-              <AttributeCard attributeKey={a.key} {...a} />
+              <AttributeCard
+                attributeKey={a.key}
+                level={a.level}
+                xp={a.xp}
+                xpToNext={a.xpToNext}
+              />
             </motion.div>
           ))}
         </motion.div>
